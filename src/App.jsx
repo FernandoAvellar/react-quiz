@@ -11,20 +11,34 @@ const initialState = {
   status: 'loading', // 'loading', 'error', 'ready', 'active', 'finished'
   index: 0,
   answer: null,
+  points: 0,
 };
 
 function reducer(state, action) {
   switch (action.type) {
-    case 'dataReceived':
+    case 'dataReceived': {
       return { ...state, questions: action.payload, status: 'ready' };
-    case 'dataFailed':
+    }
+    case 'dataFailed': {
       return { ...state, status: 'error' };
-    case 'start':
+    }
+    case 'start': {
       return { ...state, status: 'active' };
-    case 'newAnswer':
-      return { ...state, answer: action.payload };
-    default:
+    }
+    case 'newAnswer': {
+      const question = state.questions.at(state.index);
+      return {
+        ...state,
+        answer: action.payload,
+        points:
+          action.payload === question.correctOption
+            ? state.points + question.points
+            : state.points,
+      };
+    }
+    default: {
       throw new Error('Action is unknown');
+    }
   }
 }
 
@@ -35,7 +49,6 @@ export default function App() {
   );
 
   const numQuestions = questions.length;
-  console.log(questions[index]);
 
   useEffect(function () {
     async function fetchData() {
